@@ -5,29 +5,22 @@ import cats.data.EitherT
 
 import scala.language.higherKinds
 
-trait ValidationMonad[M[_]] {
+trait ValidationMonad[M[_]] extends Monad[M] {
 
   def pure[A](x: A): M[A]
 
   def flatMap[A, B](fa: M[A])(f: A => M[B]): M[B]
+
+  override def tailRecM[A, B](a: A)(f: A => M[Either[A, B]]): M[B] =
+    flatMap(f(a))({
+      case Right(b) => pure(b)
+      case Left(a1) => tailRecM(a1)(f)
+    })
 }
 
 trait ValidationResultLib[M[_]] {
 
   type ValidationResult[F, S] = EitherT[M, F, S]
-
-  implicit def monad(implicit m: ValidationMonad[M]): Monad[M] = new Monad[M] {
-
-    override def pure[A](x: A): M[A] = m.pure(x)
-
-    override def flatMap[A, B](fa: M[A])(f: A => M[B]): M[B] = m.flatMap(fa)(f)
-
-    override def tailRecM[A, B](a: A)(f: A => M[Either[A, B]]): M[B] =
-      flatMap(f(a))({
-        case Right(b) => pure(b)
-        case Left(a1) => tailRecM(a1)(f)
-      })
-  }
 
   object ValidationResult {
 
