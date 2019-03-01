@@ -1,4 +1,4 @@
-package com.softwaremill.monadvalidation.impl
+package com.softwaremill.monadvalidation.future
 
 import com.softwaremill.monadvalidation.{AbstractMonadValidationSpec, TestApp, TestAppBuilder}
 

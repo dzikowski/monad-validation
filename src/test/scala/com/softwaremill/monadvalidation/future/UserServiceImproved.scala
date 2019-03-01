@@ -1,4 +1,4 @@
-package com.softwaremill.monadvalidation.impl
+package com.softwaremill.monadvalidation.future
 
 import com.softwaremill.monadvalidation.ValidationResultLib
 import com.softwaremill.monadvalidation.domain.ValidationError._
