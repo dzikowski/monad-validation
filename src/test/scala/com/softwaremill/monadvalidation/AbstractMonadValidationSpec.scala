@@ -15,10 +15,9 @@ abstract class AbstractMonadValidationSpec
 
   implicit def ec: ExecutionContext
 
-  it should "save user" in {
+  it should "save user" in withTestApp { app =>
 
     // Given
-    val app = buildTestApp()
     val name = "John"
     val age = 42
 
@@ -30,10 +29,9 @@ abstract class AbstractMonadValidationSpec
     app.repository.findUser(name).futureValue shouldBe Some(User(name, age))
   }
 
-  it should "fail save user if user with the same name exists" in {
+  it should "fail save user if user with the same name exists" in withTestApp { app =>
 
     // Given
-    val app = buildTestApp()
     val name = "John"
     val age = 42
 
@@ -48,10 +46,9 @@ abstract class AbstractMonadValidationSpec
     app.repository.findUser(name).futureValue shouldBe Some(User(name, age))
   }
 
-  it should "fail to save user if the name is invalid" in {
+  it should "fail to save user if the name is invalid" in withTestApp { app =>
 
     // Given
-    val app = buildTestApp()
     val name = "y"
     val age = 42
 
@@ -63,10 +60,9 @@ abstract class AbstractMonadValidationSpec
     app.repository.findUser(name).futureValue shouldBe None
   }
 
-  it should "fail to save user if the age is invalid" in {
+  it should "fail to save user if the age is invalid" in withTestApp { app =>
 
     // Given
-    val app = buildTestApp()
     val name = "John"
     val age = -42
 
@@ -78,10 +74,9 @@ abstract class AbstractMonadValidationSpec
     app.repository.findUser(name).futureValue shouldBe None
   }
 
-  it should "update user's age" in {
+  it should "update user's age" in withTestApp { app =>
 
     // Given
-    val app = buildTestApp()
     val name = "John"
     val age1 = 42
     val age2 = 43
@@ -97,10 +92,9 @@ abstract class AbstractMonadValidationSpec
     app.repository.findUser(name).futureValue shouldBe Some(User(name, age2))
   }
 
-  it should "fail tu update user's age if user is missing" in {
+  it should "fail tu update user's age if user is missing" in withTestApp { app =>
 
     // Given
-    val app = buildTestApp()
     val name = "John"
     val age = 42
 
@@ -114,10 +108,9 @@ abstract class AbstractMonadValidationSpec
     app.repository.findUser(name).futureValue shouldBe None
   }
 
-  it should "fail tu update user's age if the age is invalid" in {
+  it should "fail tu update user's age if the age is invalid" in withTestApp { app =>
 
     // Given
-    val app = buildTestApp()
     val name = "John"
     val age1 = 42
     val age2 = 430

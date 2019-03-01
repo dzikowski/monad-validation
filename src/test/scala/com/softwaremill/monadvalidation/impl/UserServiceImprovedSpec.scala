@@ -8,10 +8,11 @@ class UserServiceImprovedSpec extends AbstractMonadValidationSpec with TestAppBu
 
   implicit def ec: ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  override def buildTestApp(): TestApp = {
-    val repository = new UserRepositoryNaive()
-    val service = new UserServiceImproved(repository)
-    TestApp(repository, service)
-  }
+  override def withTestApp(test: TestApp => Unit): Unit =
+    test {
+      val repository = new UserRepositoryNaive()
+      val service = new UserServiceImproved(repository)
+      TestApp(repository, service)
+    }
 }
 
