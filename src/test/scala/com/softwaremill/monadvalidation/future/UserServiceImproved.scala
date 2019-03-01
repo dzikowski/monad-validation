@@ -1,6 +1,6 @@
 package com.softwaremill.monadvalidation.future
 
-import com.softwaremill.monadvalidation.ValidationResultLib
+import com.softwaremill.monadvalidation.{ValidationMonad, ValidationResultLib}
 import com.softwaremill.monadvalidation.domain.ValidationError._
 import com.softwaremill.monadvalidation.domain._
 
@@ -8,11 +8,15 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object FuturesValidation extends ValidationResultLib[Future] {
 
-  override def pure[A](x: A)(implicit ec: ExecutionContext): Future[A] =
-    Future.successful(x)
+  implicit def futureValidation(implicit ec: ExecutionContext): ValidationMonad[Future] =
+    new ValidationMonad[Future] {
 
-  override def flatMap[A, B](fa: Future[A])(f: A => Future[B])(implicit ec: ExecutionContext): Future[B] =
-    fa.flatMap(f)
+      override def pure[A](x: A): Future[A] =
+        Future.successful(x)
+
+      override def flatMap[A, B](fa: Future[A])(f: A => Future[B]): Future[B] =
+        fa.flatMap(f)
+    }
 }
 
 class UserServiceImproved(repository: UserRepository)(implicit ec: ExecutionContext) extends UserService {
