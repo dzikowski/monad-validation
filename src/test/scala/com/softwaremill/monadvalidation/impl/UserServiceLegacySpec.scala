@@ -1,0 +1,16 @@
+package com.softwaremill.monadvalidation.impl
+
+import com.softwaremill.monadvalidation.{AbstractMonadValidationSpec, TestApp, TestAppBuilder}
+
+import scala.concurrent.ExecutionContext
+
+class UserServiceLegacySpec extends AbstractMonadValidationSpec with TestAppBuilder {
+
+  implicit def ec: ExecutionContext = scala.concurrent.ExecutionContext.global
+
+  override def buildTestApp(): TestApp = {
+    val repository = new UserRepositoryNaive()
+    val service = new UserServiceLegacy(repository)
+    TestApp(repository, service)
+  }
+}
