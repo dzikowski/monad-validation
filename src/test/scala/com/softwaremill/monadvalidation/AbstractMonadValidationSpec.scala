@@ -33,17 +33,18 @@ abstract class AbstractMonadValidationSpec
 
     // Given
     val name = "John"
-    val age = 42
+    val age1 = 42
+    val age2 = 33
 
-    app.service.saveUser(name, age).futureValue
-    app.repository.findUser(name).futureValue shouldBe Some(User(name, age))
+    app.service.saveUser(name, age1).futureValue
+    app.repository.findUser(name).futureValue shouldBe Some(User(name, age1))
 
     // When
-    val result = app.service.saveUser(name, 33).futureValue
+    val result = app.service.saveUser(name, age2).futureValue
 
     // Then
     result shouldBe Left(UserExists(name))
-    app.repository.findUser(name).futureValue shouldBe Some(User(name, age))
+    app.repository.findUser(name).futureValue shouldBe Some(User(name, age1))
   }
 
   it should "fail to save user if the name is invalid" in withTestApp { app =>
