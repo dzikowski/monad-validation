@@ -22,8 +22,8 @@ object ValidationResult {
 
   type ValidationResult[M[_], F, S] = EitherT[M, F, S]
 
-  def successfulT[M[_]: ValidationMonad, S](s: S): ValidationResult[M, _, S] =
-    EitherT.rightT[M, S](s)
+  def successfulT[M[_]: ValidationMonad, F, S](s: S): ValidationResult[M, F, S] =
+    EitherT.rightT(s)
 
   def successful[M[_]: ValidationMonad, F, S](fs: M[S]): ValidationResult[M, F, S] =
     EitherT.right(fs)

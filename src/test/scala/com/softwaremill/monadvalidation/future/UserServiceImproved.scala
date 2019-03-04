@@ -55,5 +55,8 @@ class UserServiceImproved(repository: UserRepository)(implicit ec: ExecutionCont
     ValidationResult.cond(name.length > 2, success = (), failure = InvalidName(name))
 
   private def validateAge(age: Int): ValidationResult[Future, ValidationError, Unit] =
-    ValidationResult.cond(0 <= age && age <= 150, success = (), failure = InvalidAge(age))
+    if(0 <= age && age <= 150)
+      ValidationResult.successfulT(Unit)
+    else
+      ValidationResult.failedT(InvalidAge(age))
 }
