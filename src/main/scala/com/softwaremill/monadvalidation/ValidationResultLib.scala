@@ -22,8 +22,6 @@ object ValidationResult {
 
   type ValidationResult[M[_], F, S] = EitherT[M, F, S]
 
-  def apply[M[_]: ValidationMonad]: ValidationMonad[M] = implicitly[ValidationMonad[M]]
-
   def successfulT[M[_]: ValidationMonad, S](s: S): ValidationResult[M, _, S] =
     EitherT.rightT[M, S](s)
 
@@ -48,4 +46,3 @@ object ValidationResult {
       vr.semiflatMap(fn).value
   }
 }
-
