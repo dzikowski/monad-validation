@@ -18,34 +18,31 @@ trait ValidationMonad[M[_]] extends Monad[M] {
     })
 }
 
-trait ValidationResultLib[M[_]] {
+object ValidationResult {
 
-  type ValidationResult[F, S] = EitherT[M, F, S]
+  type ValidationResult[M[_], F, S] = EitherT[M, F, S]
 
-  object ValidationResult {
+  def successfulT[M[_]: ValidationMonad, F, S](s: S): ValidationResult[M, F, S] =
+    EitherT.rightT(s)
 
-    def successfulT[F, S](s: S)(implicit m: ValidationMonad[M]): ValidationResult[F, S] =
-      EitherT.rightT(s)
+  def successful[M[_]: ValidationMonad, F, S](fs: M[S]): ValidationResult[M, F, S] =
+    EitherT.right(fs)
 
-    def successful[F, S](fs: M[S])(implicit m: ValidationMonad[M]): ValidationResult[F, S] =
-      EitherT.right(fs)
+  def failedT[M[_]: ValidationMonad, F, S](f: F): ValidationResult[M, F, S] =
+    EitherT.leftT(f)
 
-    def failedT[F, S](f: F)(implicit m: ValidationMonad[M]): ValidationResult[F, S] =
-      EitherT.leftT(f)
+  def cond[M[_]: ValidationMonad, F, S](c: => Boolean, success: S, failure: F): ValidationResult[M, F, S] =
+    EitherT.cond[M](c, success, failure)
 
-    def cond[F, S](c: => Boolean, success: S, failure: F)(implicit m: ValidationMonad[M]): ValidationResult[F, S] =
-      EitherT.cond[M](c, success, failure)
+  def fromOptionF[M[_]: ValidationMonad, F, S](opt: M[Option[S]], ifNone: => F): ValidationResult[M, F, S] =
+    EitherT.fromOptionF(opt, ifNone)
 
-    def fromOptionF[F, S](opt: M[Option[S]], ifNone: => F)(implicit m: ValidationMonad[M]): ValidationResult[F, S] =
-      EitherT.fromOptionF(opt, ifNone)
-  }
+  implicit class ValidationResultOps[M[_]: ValidationMonad, F, S](vr: ValidationResult[M, F, S]){
 
-  implicit class ValidationResultOps[F, S](vr: ValidationResult[F, S]) {
-
-    def onSuccess[S2](s2: => M[S2])(implicit m: ValidationMonad[M]): M[Either[F, S2]] =
+    def onSuccess[S2](s2: => M[S2]): M[Either[F, S2]] =
       vr.onSuccess(_ => s2)
 
-    def onSuccess[S2](fn: S => M[S2])(implicit m: ValidationMonad[M]): M[Either[F, S2]] =
+    def onSuccess[S2](fn: S => M[S2]): M[Either[F, S2]] =
       vr.semiflatMap(fn).value
   }
 }
