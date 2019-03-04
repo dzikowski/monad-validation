@@ -2,7 +2,7 @@ package com.softwaremill.monadvalidation
 
 import scala.concurrent.Future
 
-object domain {
+package object domain {
 
   case class User(name: String, age: Int)
 
@@ -14,7 +14,7 @@ object domain {
   sealed trait ValidationError
 
   object ValidationError {
-    case class UserExists(name: String) extends ValidationError
+    case class UserAlreadyExists(name: String) extends ValidationError
     case class UserNofFound(name: String) extends ValidationError
     case class InvalidName(name: String) extends ValidationError
     case class InvalidAge(age: Int) extends ValidationError

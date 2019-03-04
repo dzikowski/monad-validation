@@ -1,9 +1,16 @@
-package com.softwaremill.monadvalidation
+package com.softwaremill.monadvalidation.lib
 
 import cats.Monad
 import cats.data.EitherT
 
 import scala.language.higherKinds
+
+// TODO
+//  - generyczne servicy M
+//  - lib/domain pakiety
+//  - M: ValidationMonad
+//  - apply w companion może wywalić konieczność geenrycznego Lib[M] (zob. scalac)
+
 
 trait ValidationMonad[M[_]] extends Monad[M] {
 

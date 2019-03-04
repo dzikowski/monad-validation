@@ -1,7 +1,7 @@
-package com.softwaremill.monadvalidation.future
+package com.softwaremill.monadvalidation.domain.future
 
 import com.softwaremill.monadvalidation.domain.ValidationError._
-import com.softwaremill.monadvalidation.domain._
+import com.softwaremill.monadvalidation.domain.{User, UserRepository, UserService, ValidationError}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -9,7 +9,7 @@ class UserServiceLegacy(repository: UserRepository)(implicit ec: ExecutionContex
 
   def saveUser(name: String, age: Int): Future[Either[ValidationError, User]] =
     repository.findUser(name).flatMap {
-      case Some(user) => Future.successful(Left(UserExists(user.name)))
+      case Some(user) => Future.successful(Left(UserAlreadyExists(user.name)))
       case None if !nameIsValid(name) => Future.successful(Left(InvalidName(name)))
       case None if !ageIsValid(age) => Future.successful(Left(InvalidAge(age)))
       case _ => repository.putUser(User(name, age)).map(Right.apply)

@@ -1,4 +1,4 @@
-package com.softwaremill.monadvalidation.future
+package com.softwaremill.monadvalidation.domain.future
 
 import com.softwaremill.monadvalidation.domain.{User, UserRepository}
 

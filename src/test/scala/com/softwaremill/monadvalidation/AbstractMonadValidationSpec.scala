@@ -43,7 +43,7 @@ abstract class AbstractMonadValidationSpec
     val result = app.service.saveUser(name, age2).futureValue
 
     // Then
-    result shouldBe Left(UserExists(name))
+    result shouldBe Left(UserAlreadyExists(name))
     app.repository.findUser(name).futureValue shouldBe Some(User(name, age1))
   }
 

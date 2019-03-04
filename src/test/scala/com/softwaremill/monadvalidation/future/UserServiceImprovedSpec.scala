@@ -1,5 +1,6 @@
 package com.softwaremill.monadvalidation.future
 
+import com.softwaremill.monadvalidation.domain.future.{UserRepositoryNaive, UserServiceImproved}
 import com.softwaremill.monadvalidation.{AbstractMonadValidationSpec, TestApp, TestAppBuilder}
 
 import scala.concurrent.ExecutionContext

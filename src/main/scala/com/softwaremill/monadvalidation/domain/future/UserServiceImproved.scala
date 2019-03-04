@@ -1,8 +1,8 @@
-package com.softwaremill.monadvalidation.future
+package com.softwaremill.monadvalidation.domain.future
 
-import com.softwaremill.monadvalidation.{ValidationMonad, ValidationResultLib}
 import com.softwaremill.monadvalidation.domain.ValidationError._
 import com.softwaremill.monadvalidation.domain._
+import com.softwaremill.monadvalidation.lib.{ValidationMonad, ValidationResultLib}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -47,8 +47,8 @@ class UserServiceImproved(repository: UserRepository)(implicit ec: ExecutionCont
   private def validateIfUserDoesNotExist(name: String): ValidationResult[ValidationError, Unit] =
     ValidationResult
       .successful[ValidationError, Option[User]](repository.findUser(name))
-      .ensure(onFailure = UserExists(name))(_.isEmpty)
-      .map(_ => ())
+      .ensure(onFailure = UserAlreadyExists(name))(_.isEmpty)
+      .map(_ => Unit)
 
   private def getUser(name: String): ValidationResult[ValidationError, User] =
     ValidationResult.fromOptionF(repository.findUser(name), ifNone = UserNofFound(name))
