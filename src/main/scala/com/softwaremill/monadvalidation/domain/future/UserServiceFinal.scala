@@ -19,26 +19,26 @@ object FuturesValidation extends ValidationResultLib[Future] {
     }
 }
 
-class UserServiceImproved(repository: UserRepository)(implicit ec: ExecutionContext) extends UserService {
+class UserServiceFinal(repository: UserRepository, ageService: AgeService)(implicit ec: ExecutionContext) extends UserService {
 
   import FuturesValidation._
 
-  def saveUser(name: String, age: Int): Future[Either[ValidationError, User]] = {
+  def saveUser(name: String, age: Int, country: String): Future[Either[ValidationError, User]] = {
     val validationResult =
       for {
         _ <- validateIfUserDoesNotExist(name)
         _ <- validateName(name)
-        _ <- validateAge(age)
+        _ <- validateAge(age, country)
       } yield ()
 
-    validationResult.onSuccess(repository.putUser(User(name, age)))
+    validationResult.onSuccess(repository.putUser(User(name, age, country)))
   }
 
   def updateAge(name: String, age: Int): Future[Either[ValidationError, User]] = {
     val validationResult =
       for {
         u <- getUser(name)
-        _ <- validateAge(age)
+        _ <- validateAge(age, u.country)
       } yield u
 
     validationResult.onSuccess(u => repository.putUser(u.copy(age = age)))
@@ -56,6 +56,9 @@ class UserServiceImproved(repository: UserRepository)(implicit ec: ExecutionCont
   private def validateName(name: String): ValidationResult[ValidationError, Unit] =
     ValidationResult.cond(name.length > 2, success = (), failure = InvalidName(name))
 
-  private def validateAge(age: Int): ValidationResult[ValidationError, Unit] =
-    ValidationResult.cond(0 <= age && age <= 150, success = (), failure = InvalidAge(age))
+  private def validateAge(age: Int, country: String): ValidationResult[ValidationError, Unit] =
+    ValidationResult
+      .successful[ValidationError, Boolean](ageService.isAgeValid(age, country))
+      .ensure(onFailure = InvalidAge(age, country))(isValid => isValid)
+      .map(_ => Unit)
 }

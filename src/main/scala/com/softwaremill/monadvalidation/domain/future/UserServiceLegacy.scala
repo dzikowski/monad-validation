@@ -5,26 +5,32 @@ import com.softwaremill.monadvalidation.domain.{User, UserRepository, UserServic
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class UserServiceLegacy(repository: UserRepository)(implicit ec: ExecutionContext) extends UserService {
+trait AgeService {
+  def isAgeValid(age: Int, country: String): Future[Boolean]
+}
 
-  def saveUser(name: String, age: Int): Future[Either[ValidationError, User]] =
-    repository.findUser(name).flatMap {
-      case Some(user) => Future.successful(Left(UserAlreadyExists(user.name)))
-      case None if !nameIsValid(name) => Future.successful(Left(InvalidName(name)))
-      case None if !ageIsValid(age) => Future.successful(Left(InvalidAge(age)))
-      case _ => repository.putUser(User(name, age)).map(Right.apply)
-    }
+class UserServiceLegacy(repository: UserRepository, ageService: AgeService)(implicit ec: ExecutionContext) extends UserService {
+
+  def saveUser(name: String, age: Int, country: String): Future[Either[ValidationError, User]] =
+    if (name.length >= 2)
+      repository.findUser(name).flatMap {
+        case Some(_) => Future.successful(Left(UserAlreadyExists(name)))
+        case None =>
+          ageService.isAgeValid(age, country).flatMap {
+            case false => Future.successful(Left(InvalidAge(age, country)))
+            case true => repository.putUser(User(name, age, country)).map(u => Right(u))
+          }
+      }
+    else
+      Future.successful(Left(InvalidName(name)))
 
   def updateAge(name: String, age: Int): Future[Either[ValidationError, User]] =
     repository.findUser(name).flatMap {
       case None => Future.successful(Left(UserNofFound(name)))
-      case Some(_) if !ageIsValid(age) => Future.successful(Left(InvalidAge(age)))
-      case Some(u) => repository.putUser(u.copy(age = age)).map(Right.apply)
+      case Some(user) =>
+        ageService.isAgeValid(age, user.country).flatMap {
+          case false => Future.successful(Left(InvalidAge(age, user.country)))
+          case true => repository.putUser(user.copy(age = age)).map(u => Right(u))
+        }
     }
-
-  private def nameIsValid(name: String): Boolean =
-    name.length > 2
-
-  private def ageIsValid(age: Int): Boolean =
-    0 <= age && age <= 150
 }
