@@ -30,11 +30,11 @@ trait ValidationResultLib[M[_]] {
     def failed[F, S](f: F)(implicit m: ValidationMonad[M]): ValidationResult[F, S] =
       EitherT.leftT(f)
 
-    def cond[F, S](c: => Boolean, success: S, failure: F)(implicit m: ValidationMonad[M]): ValidationResult[F, S] =
-      EitherT.cond[M](c, success, failure)
+    def ensure[F](c: => Boolean, onFailure: => F)(implicit m: ValidationMonad[M]): ValidationResult[F, Unit] =
+      EitherT.cond[M](c, Unit, onFailure)
 
-    def condF[F, S](c: => M[Boolean], success:S, failure: F)(implicit m: ValidationMonad[M]): ValidationResult[F, S] =
-      EitherT.right(c).ensure(failure)(b => b).map(_ => success)
+    def ensureF[F](c: => M[Boolean], onFailure: => F)(implicit m: ValidationMonad[M]): ValidationResult[F, Unit] =
+      EitherT.right(c).ensure(onFailure)(b => b).map(_ => Unit)
 
     def fromOptionF[F, S](opt: M[Option[S]], ifNone: => F)(implicit m: ValidationMonad[M]): ValidationResult[F, S] =
       EitherT.fromOptionF(opt, ifNone)
