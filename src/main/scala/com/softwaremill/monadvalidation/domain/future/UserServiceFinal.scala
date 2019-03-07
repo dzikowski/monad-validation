@@ -57,6 +57,6 @@ class UserServiceFinal(repository: UserRepository, ageService: AgeService)(impli
 
   private def validateAge(age: Int, country: String): ValidationResult[ValidationError, Unit] = {
     val isAgeValid = ageService.isAgeValid(age, country)
-    ValidationResult.condF(isAgeValid, Unit, InvalidAge(age, country))
+    ValidationResult.condF(isAgeValid, success = Unit, failure = InvalidAge(age, country))
   }
 }
