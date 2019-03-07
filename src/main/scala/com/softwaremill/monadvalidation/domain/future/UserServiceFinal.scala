@@ -44,11 +44,10 @@ class UserServiceFinal(repository: UserRepository, ageService: AgeService)(impli
     validationResult.onSuccess(u => repository.putUser(u.copy(age = age)))
   }
 
-  private def validateIfUserDoesNotExist(name: String): ValidationResult[ValidationError, Unit] =
-    ValidationResult
-      .successful[ValidationError, Option[User]](repository.findUser(name))
-      .ensure(onFailure = UserAlreadyExists(name))(_.isEmpty)
-      .map(_ => Unit)
+  private def validateIfUserDoesNotExist(name: String): ValidationResult[ValidationError, Unit] = {
+    val userDoesNotExists = repository.findUser(name).map(_.isEmpty)
+    ValidationResult.condF(userDoesNotExists, success = Unit, failure = UserAlreadyExists(name))
+  }
 
   private def getUser(name: String): ValidationResult[ValidationError, User] =
     ValidationResult.fromOptionF(repository.findUser(name), ifNone = UserNofFound(name))
@@ -56,9 +55,8 @@ class UserServiceFinal(repository: UserRepository, ageService: AgeService)(impli
   private def validateName(name: String): ValidationResult[ValidationError, Unit] =
     ValidationResult.cond(name.length > 2, success = (), failure = InvalidName(name))
 
-  private def validateAge(age: Int, country: String): ValidationResult[ValidationError, Unit] =
-    ValidationResult
-      .successful[ValidationError, Boolean](ageService.isAgeValid(age, country))
-      .ensure(onFailure = InvalidAge(age, country))(isValid => isValid)
-      .map(_ => Unit)
+  private def validateAge(age: Int, country: String): ValidationResult[ValidationError, Unit] = {
+    val isAgeValid = ageService.isAgeValid(age, country)
+    ValidationResult.condF(isAgeValid, Unit, InvalidAge(age, country))
+  }
 }

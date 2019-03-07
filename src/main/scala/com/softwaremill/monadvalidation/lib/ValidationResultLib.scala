@@ -24,17 +24,17 @@ trait ValidationResultLib[M[_]] {
 
   object ValidationResult {
 
-    def successfulT[F, S](s: S)(implicit m: ValidationMonad[M]): ValidationResult[F, S] =
+    def successful[F, S](s: S)(implicit m: ValidationMonad[M]): ValidationResult[F, S] =
       EitherT.rightT(s)
 
-    def successful[F, S](fs: M[S])(implicit m: ValidationMonad[M]): ValidationResult[F, S] =
-      EitherT.right(fs)
-
-    def failedT[F, S](f: F)(implicit m: ValidationMonad[M]): ValidationResult[F, S] =
+    def failed[F, S](f: F)(implicit m: ValidationMonad[M]): ValidationResult[F, S] =
       EitherT.leftT(f)
 
     def cond[F, S](c: => Boolean, success: S, failure: F)(implicit m: ValidationMonad[M]): ValidationResult[F, S] =
       EitherT.cond[M](c, success, failure)
+
+    def condF[F, S](c: => M[Boolean], success:S, failure: F)(implicit m: ValidationMonad[M]): ValidationResult[F, S] =
+      EitherT.right(c).ensure(failure)(b => b).map(_ => success)
 
     def fromOptionF[F, S](opt: M[Option[S]], ifNone: => F)(implicit m: ValidationMonad[M]): ValidationResult[F, S] =
       EitherT.fromOptionF(opt, ifNone)
