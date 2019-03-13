@@ -2,21 +2,15 @@ package com.softwaremill.monadvalidation.domain.future
 
 import com.softwaremill.monadvalidation.domain.ValidationError._
 import com.softwaremill.monadvalidation.domain._
-import com.softwaremill.monadvalidation.lib.{ValidationMonad, ValidationResultLib}
+import com.softwaremill.monadvalidation.lib.ValidationResultLib
 
 import scala.concurrent.{ExecutionContext, Future}
 
 object FuturesValidation extends ValidationResultLib[Future] {
+  import cats.Monad
+  import cats.instances.future.catsStdInstancesForFuture
 
-  implicit def futureValidation(implicit ec: ExecutionContext): ValidationMonad[Future] =
-    new ValidationMonad[Future] {
-
-      override def pure[A](x: A): Future[A] =
-        Future.successful(x)
-
-      override def flatMap[A, B](fa: Future[A])(f: A => Future[B]): Future[B] =
-        fa.flatMap(f)
-    }
+  implicit def monad(implicit ec: ExecutionContext): Monad[Future] = catsStdInstancesForFuture
 }
 
 class UserServiceFinal(repository: UserRepository, ageService: AgeService)(implicit ec: ExecutionContext) extends UserService {
